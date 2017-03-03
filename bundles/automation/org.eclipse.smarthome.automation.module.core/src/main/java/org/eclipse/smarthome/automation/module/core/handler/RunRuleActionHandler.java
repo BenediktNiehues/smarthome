@@ -7,6 +7,7 @@
  */
 package org.eclipse.smarthome.automation.module.core.handler;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -36,7 +37,7 @@ import org.slf4j.LoggerFactory;
  * @author Benedikt Niehues initial contribution
  *
  */
-public class RunRuleHandler extends BaseModuleHandler<Action> implements ActionHandler {
+public class RunRuleActionHandler extends BaseModuleHandler<Action> implements ActionHandler {
 
     /**
      * The UID for this handler for identification in the factory.
@@ -47,16 +48,22 @@ public class RunRuleHandler extends BaseModuleHandler<Action> implements ActionH
      * the key for the 'rulesUIDs' property of the {@link Action}.
      */
     private final static String RULE_UIDS_KEY = "ruleUIDs";
+    private final static String CONSIDER_CONDITIONS_KEY ="considerConditions";
 
     /**
      * The logger
      */
-    private final static Logger logger = LoggerFactory.getLogger(RunRuleHandler.class);
+    private final static Logger logger = LoggerFactory.getLogger(RunRuleActionHandler.class);
 
     /**
      * the UIDs of the rules to be executed.
      */
     private final List<String> ruleUIDs;
+    
+    /**
+     * boolean to express if the conditions should be considered, defaults to true;
+     */
+    private boolean considerConditions=true;
 
     /**
      * the {@link RuleRegistry} is used to run rules.
@@ -65,27 +72,30 @@ public class RunRuleHandler extends BaseModuleHandler<Action> implements ActionH
 
 
     @SuppressWarnings("unchecked")
-    public RunRuleHandler(final Action module, final RuleRegistry ruleRegistry) {
+    public RunRuleActionHandler(final Action module, final RuleRegistry ruleRegistry) {
         super(module);
         final Configuration config = module.getConfiguration();
         if (config == null) {
             throw new IllegalArgumentException("'Configuration' can not be null.");
         }
 
-        ruleUIDs = (List<String>) config.get(RULE_UIDS_KEY);
-        if (ruleUIDs == null) {
-            throw new IllegalArgumentException("'ruleUIDs' property can not be null.");
-        }
+		ruleUIDs = (List<String>) config.get(RULE_UIDS_KEY);
+		if (ruleUIDs == null) {
+			throw new IllegalArgumentException("'ruleUIDs' property can not be null.");
+		}
+		if (config.get(CONSIDER_CONDITIONS_KEY) != null && config.get(CONSIDER_CONDITIONS_KEY) instanceof Boolean) {
+			this.considerConditions = ((Boolean) config.get(CONSIDER_CONDITIONS_KEY)).booleanValue();
+		}
 
         this.ruleRegistry = ruleRegistry;
     }
 
     @Override
-    public Map<String, Object> execute(Map<String, ?> context) {
+    public Map<String, Object> execute(Map<String, Object> context) {
     	// execute each rule after the other; at the moment synchronously
         for (String uid : ruleUIDs) {
             if (ruleRegistry != null) {
-                ruleRegistry.runNow(uid);
+                ruleRegistry.runNow(uid, considerConditions);
             } else {
                 logger.warn("Action is not applyed to {} because RuleRegistry is not available.", uid);
             }
