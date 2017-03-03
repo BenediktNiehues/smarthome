@@ -844,36 +844,50 @@ public class RuleEngine implements RegistryChangeListener<ModuleType> {
         }
     }
 
+    protected void runNow(String ruleUID, Map<String, Object> context, boolean considerConditions){
+    	 RuntimeRule rule = getRuntimeRule(ruleUID);
+         if (rule == null) {
+             logger.warn("Fail to execute rule '{}': {}", ruleUID, "Invalid Rule UID.");
+             return;
+         }
+
+         synchronized (this) {
+             final RuleStatus ruleStatus = getRuleStatus(ruleUID);
+             if (ruleStatus != RuleStatus.IDLE) {
+                 logger.error("Failed to execute rule ‘{}' with status '{}'", ruleUID, ruleStatus.name());
+                 return;
+             }
+             // change state to RUNNING
+             setRuleStatusInfo(ruleUID, new RuleStatusInfo(RuleStatus.RUNNING),true);
+         }
+
+         try {
+			if (context == null) {
+				clearContext(rule);
+			} else {
+				setContext(rule, context);
+			}
+			if (considerConditions) {
+				if (calculateConditions(rule)) {
+					executeActions(rule, false);
+				}
+			} else {
+				executeActions(rule, false);
+			}
+             logger.debug("The rule '{}' is executed.", ruleUID);
+         } catch (Throwable t) {
+             logger.error("Fail to execute rule '{}': {}", new Object[] { ruleUID, t.getMessage() }, t);
+         }
+         // change state to IDLE only if the rule has not been DISABLED.
+         synchronized (this) {
+             if (getRuleStatus(ruleUID) == RuleStatus.RUNNING) {
+                 setRuleStatusInfo(ruleUID, new RuleStatusInfo(RuleStatus.IDLE),true);
+             }
+         }
+    }
+    
     protected void runNow(String ruleUID) {
-        RuntimeRule rule = getRuntimeRule(ruleUID);
-        if (rule == null) {
-            logger.warn("Fail to execute rule '{}': {}", ruleUID, "Invalid Rule UID.");
-            return;
-        }
-
-        synchronized (this) {
-            final RuleStatus ruleStatus = getRuleStatus(ruleUID);
-            if (ruleStatus != RuleStatus.IDLE) {
-                logger.error("Failed to execute rule ‘{}' with status '{}'", ruleUID, ruleStatus.name());
-                return;
-            }
-            // change state to RUNNING
-            setRuleStatusInfo(ruleUID, new RuleStatusInfo(RuleStatus.RUNNING), true);
-        }
-
-        try {
-            clearContext(rule);
-            executeActions(rule, false);
-            logger.debug("The rule '{}' is executed.", ruleUID);
-        } catch (Throwable t) {
-            logger.error("Fail to execute rule '{}': {}", new Object[] { ruleUID, t.getMessage() }, t);
-        }
-        // change state to IDLE only if the rule has not been DISABLED.
-        synchronized (this) {
-            if (getRuleStatus(ruleUID) == RuleStatus.RUNNING) {
-                setRuleStatusInfo(ruleUID, new RuleStatusInfo(RuleStatus.IDLE), true);
-            }
-        }
+		runNow(ruleUID, null, false);
     }
 
     protected void clearContext(RuntimeRule rule) {
@@ -881,6 +895,12 @@ public class RuleEngine implements RegistryChangeListener<ModuleType> {
         if (context != null) {
             context.clear();
         }
+    }
+    
+    private void setContext(RuntimeRule rule, Map<String, Object> context){
+    	if (context!=null){
+    		contextMap.put(rule.getUID(), context);
+    	}
     }
 
     /**

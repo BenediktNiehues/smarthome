@@ -81,11 +81,11 @@ public class RunRuleHandler extends BaseModuleHandler<Action> implements ActionH
     }
 
     @Override
-    public Map<String, Object> execute(Map<String, ?> context) {
+    public Map<String, Object> execute(Map<String, Object> context) {
     	// execute each rule after the other; at the moment synchronously
         for (String uid : ruleUIDs) {
             if (ruleRegistry != null) {
-                ruleRegistry.runNow(uid);
+                ruleRegistry.runNow(uid, context, true);
             } else {
                 logger.warn("Action is not applyed to {} because RuleRegistry is not available.", uid);
             }

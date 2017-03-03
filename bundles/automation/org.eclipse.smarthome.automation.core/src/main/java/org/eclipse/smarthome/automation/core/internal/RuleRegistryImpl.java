@@ -578,4 +578,11 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
         ruleEngine.runNow(ruleUID);
     }
 
+	@Override
+	public void runNow(String ruleUID, Map<String, Object> context, boolean considerConditions) {
+		ruleEngine.runNow(ruleUID, context, considerConditions);
+		// TODO Auto-generated method stub
+		
+	}
+
 }
