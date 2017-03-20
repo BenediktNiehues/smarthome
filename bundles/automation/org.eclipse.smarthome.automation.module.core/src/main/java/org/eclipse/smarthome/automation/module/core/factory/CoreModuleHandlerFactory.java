@@ -23,8 +23,10 @@ import org.eclipse.smarthome.automation.module.core.handler.GenericEventTriggerH
 import org.eclipse.smarthome.automation.module.core.handler.ItemCommandActionHandler;
 import org.eclipse.smarthome.automation.module.core.handler.ItemCommandTriggerHandler;
 import org.eclipse.smarthome.automation.module.core.handler.ItemStateConditionHandler;
+import org.eclipse.smarthome.automation.module.core.handler.ItemStateThresholdTriggerHandler;
 import org.eclipse.smarthome.automation.module.core.handler.ItemStateTriggerHandler;
 import org.eclipse.smarthome.automation.module.core.handler.RuleEnablementActionHandler;
+import org.eclipse.smarthome.automation.module.core.handler.RunRuleActionHandler;
 import org.eclipse.smarthome.core.events.EventPublisher;
 import org.eclipse.smarthome.core.items.ItemRegistry;
 import org.osgi.service.component.ComponentContext;
@@ -48,7 +50,8 @@ public class CoreModuleHandlerFactory extends BaseModuleHandlerFactory {
                     ItemStateTriggerHandler.CHANGE_MODULE_TYPE_ID, ItemStateConditionHandler.ITEM_STATE_CONDITION,
                     ItemCommandActionHandler.ITEM_COMMAND_ACTION, GenericEventTriggerHandler.MODULE_TYPE_ID,
                     GenericEventConditionHandler.MODULETYPE_ID, GenericEventConditionHandler.MODULETYPE_ID,
-                    CompareConditionHandler.MODULE_TYPE, RuleEnablementActionHandler.UID });
+                    CompareConditionHandler.MODULE_TYPE, RuleEnablementActionHandler.UID, RunRuleActionHandler.UID,
+                    ItemStateThresholdTriggerHandler.MODULE_TYPE_ID });
 
     private ItemRegistry itemRegistry;
     private EventPublisher eventPublisher;
@@ -160,6 +163,8 @@ public class CoreModuleHandlerFactory extends BaseModuleHandlerFactory {
             } else if (ItemStateTriggerHandler.CHANGE_MODULE_TYPE_ID.equals(moduleTypeUID)
                     || ItemStateTriggerHandler.UPDATE_MODULE_TYPE_ID.equals(moduleTypeUID)) {
                 return new ItemStateTriggerHandler((Trigger) module, this.bundleContext);
+            } else if (ItemStateThresholdTriggerHandler.MODULE_TYPE_ID.equals(moduleTypeUID)){
+                return new ItemStateThresholdTriggerHandler((Trigger) module, this.bundleContext);
             }
         } else if (module instanceof Condition) {
             // Handle conditions
@@ -182,6 +187,8 @@ public class CoreModuleHandlerFactory extends BaseModuleHandlerFactory {
                 return postCommandActionHandler;
             } else if (RuleEnablementActionHandler.UID.equals(moduleTypeUID)) {
                 return new RuleEnablementActionHandler((Action) module, ruleRegistry);
+            } else if (RunRuleActionHandler.UID.equals(moduleTypeUID)) {
+                return new RunRuleActionHandler((Action) module, ruleRegistry);
             }
         }
 

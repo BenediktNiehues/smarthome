@@ -1,0 +1,148 @@
+{
+   "triggers":[
+      {
+         "uid":"core.ItemStateThresholdTrigger",
+         "label":"an items state exceeds a threshold",
+         "description":"Triggers Rules on Events if the value exceeds some Threshold",
+         "configDescriptions":[
+            {
+               "name":"threshold",
+               "type":"TEXT",
+               "label":"threshold",
+               "description":"this is value of the threshold; if BETWEEN is selected as operator, then two values, comma separated are expected here!",
+               "required":true,
+               "limitToOptions":false,
+               "options":[
+               {
+                  "label": "ON",
+                  "value": "ON"
+               },
+               {
+                  "label": "OFF",
+                  "value": "OFF"
+               },
+               {
+                  "label": "OPEN",
+                  "value": "OPEN"
+               },
+               {
+                  "label": "CLOSED",
+                  "value": "CLOSED"
+               },
+               {
+                  "label": "UP",
+                  "value": "UP"
+               },
+               {
+                  "label": "DOWN",
+                  "value": "DOWN"
+               }
+               ]
+            },
+            {
+               "name":"itemName",
+               "type":"TEXT",
+               "label":"Item",
+               "context":"item",
+               "description":"this is the name of the item which should be observed",
+               "required":true
+            },
+            {
+               "name":"timeboxValue",
+               "type":"INTEGER",
+               "label":"timebox",
+               "description":"don't execute the rule directly, only if the item's value exceeds the threshold for a given timespan"
+            },
+            {
+               "name":"timeboxUnit",
+               "type":"TEXT",
+               "label":"Timebox UNIT",
+               "description":"the Unit of the selected Timebox interval (defaults to Minutes)",
+               "defaultValue":"MINUTES",
+               "options":[
+               {
+                  "label": "MILLISECONDS",
+                  "value": "MILLISECONDS"
+               },
+               {
+                  "label": "SECONDS",
+                  "value": "SECONDS"
+               },
+               {
+                  "label": "MINUTES",
+                  "value": "MINUTES"
+               },
+               {
+                  "label": "HOURS",
+                  "value": "HOURS"
+               },
+               {
+                  "label": "DAYS",
+                  "value": "DAYS"
+               }
+               ]
+            },
+            {
+               "name":"operator",
+               "type":"TEXT",
+               "label":"compare operator",
+               "description":"this operator is used for the comparsion of the threshold",
+               "defaultValue":"MINUTES",
+               "options":[
+               {
+                  "label": "EQUALS (=)",
+                  "value": "EQUALS"
+               },
+               {
+                  "label": "LT (<)",
+                  "value": "LT"
+               },
+               {
+                  "label": "GT (>)",
+                  "value": "GT"
+               },
+               {
+                  "label": "NOTEQUAL (!=)",
+                  "value": "NOTEQUAL"
+               },
+               {
+                  "label": "LT or EQUAL (<=)",
+                  "value": "LT_EQ"
+               },
+               {
+               	  "label": "GT or EQUAL (>=)",
+               	  "value": "GT_EQ"
+               },
+               {
+               	  "label": "BETWEEN",
+               	  "value": "BETWEEN"
+               }
+               ]
+            }
+            ],
+         "outputs":[
+            {
+               "name":"itemState",
+               "type":"org.eclipse.smarthome.core.types.State",
+               "label":"itemState",
+               "description":"The latest state of the item.",
+               "reference":"state"
+            },
+            {
+            	"name": "timeboxValue",
+            	"type": "java.lang.Long",
+            	"label": "timebox",
+            	"description": "this is set if the rule was triggered because of an exceeded timebox",
+            	"reference": "long"
+            },
+            {
+            	"name": "timeboxUnit",
+            	"type": "java.lang.String",
+            	"label": "timeboxUnit",
+            	"description": "this is set if the rule was triggered because of an exceeded timebox",
+            	"reference": "unit"
+            }
+         ]
+      }
+   ]
+}
